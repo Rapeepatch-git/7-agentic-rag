@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>7-Eleven Smart Retail E-Bulletin Agentic RAG (140 SKUs) | Antigravity</title>
+  <link rel="stylesheet" href="styles.css?v=20260812_v299">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Top Tricolor Stripes Bar -->
+  <div class="brand-stripes-top">
+    <div class="stripe-red"></div>
+    <div class="stripe-green"></div>
+    <div class="stripe-orange"></div>
+  </div>
+
+  <!-- App Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <!-- Left side: Back Button + Logo / Dashboard Title -->
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <!-- Back Button (Shown when Dashboard is Active, placed at far left) -->
+        <button id="hdr-dashboard-back-btn" class="btn-filter-reset" style="display: none; width: 44px; height: 44px; font-size: 16px; border-radius: 10px; flex-shrink: 0; align-items: center; justify-content: center;" title="ย้อนกลับไปหน้าหลัก (Back to Catalog)">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+
+        <!-- Standard 7-Eleven Logo Badge & Brand Title (Shown when Catalog / Reorder View Active) -->
+        <div class="brand-logo-area" id="hdr-logo-area" style="display: flex; align-items: center; gap: 14px;">
+          <div class="logo-badge">
+            <div class="logo-inner">
+              <span class="logo-7">7</span>
+              <span class="logo-eleven">ELEVEN</span>
+            </div>
+          </div>
+          <div class="brand-title">
+            <h1 style="font-size: 22px; font-weight: 900; color: var(--711-text-main); margin: 0; white-space: nowrap; letter-spacing: -0.5px;">E-BULLETIN &amp; Stock</h1>
+          </div>
+        </div>
+
+        <!-- Dashboard Title Replacement (Shown when Dashboard Active, replaces Logo 7) -->
+        <div id="hdr-dashboard-title-area" style="display: none; flex-direction: column; gap: 2px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--711-text-main); display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+            <i class="fa-solid fa-chart-pie" style="color: #005D3B;"></i>
+            <span data-i18n="dash_title">แดชบอร์ดสรุปภาพรวม</span>
+          </h2>
+          <p style="font-size: 11.5px; color: var(--711-text-muted); margin: 0;" data-i18n="dash_desc">สรุปภาพรวมสถานะสินค้า ระดับคลังสต็อก สัดส่วนโปรโมชั่น และรายการแจ้งเตือนสต็อกหมด/ใกล้หมดเรียลไทม์</p>
+        </div>
+
+        <!-- Reorder Title Replacement (Shown when Reorder View Active, replaces Logo 7) -->
+        <div id="hdr-reorder-title-area" style="display: none; flex-direction: column; gap: 2px;">
+          <h2 style="margin: 0; font-size: 16px; font-weight: 800; color: var(--711-text-main); display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+            <i class="fa-solid fa-cart-flatbed" style="color: #005D3B;"></i>
+            <span data-i18n="reorder_title">ใบสั่งซื้อสินค้า</span>
+          </h2>
+          <p style="font-size: 11.5px; color: var(--711-text-muted); margin: 0;" data-i18n="reorder_desc">รายการสินค้าทั้งหมด สามารถเลือกและระบุจำนวนสั่งซื้อได้ (คำนวณจำนวนสั่งซื้อเริ่มต้นจาก Capacity - สต็อกปัจจุบัน)</p>
+        </div>
+      </div>
+
+      <div class="header-right-area" style="display: flex; align-items: center; gap: 12px;">
+        <!-- Segmented Language Toggle Switch (TH / EN) -->
+        <div class="lang-toggle-switch" id="lang-toggle-switch" title="สลับภาษา / Toggle Language">
+          <button type="button" class="lang-switch-btn active" id="lang-btn-th" data-lang="TH">
+            <span class="lang-flag">🇹🇭</span> TH
+          </button>
+          <button type="button" class="lang-switch-btn" id="lang-btn-en" data-lang="EN">
+            <span class="lang-flag">🇬🇧</span> EN
+          </button>
+        </div>
+
+        <!-- Entrance Button for Dashboard -->
+        <button type="button" class="nav-dashboard-btn" id="nav-dashboard-btn" title="ดูแดชบอร์ดสรุปข้อมูล">
+          <i class="fa-solid fa-chart-pie" style="color: #005D3B;"></i>
+          <span id="nav-dashboard-btn-text" data-i18n="btn_dashboard">แดชบอร์ด</span>
+        </button>
+
+        <!-- Entrance Button for Reorder Sheet (Original Dark Green #005D3B when inactive, Active light green #E6F4EF when active) -->
+        <button type="button" class="nav-reorder-btn" id="btn-open-reorder" title="เปิดหน้าใบสั่งซื้อสินค้า">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span data-i18n="btn_reorder_sheet">ใบสั่งซื้อสินค้า</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper (Main Page is Strictly E-Bulletin Catalog & Inventory Center) -->
+  <main class="main-wrapper">
+
+
+    <!-- Main View: Unified Products & E-Bulletin Catalog / Inventory View -->
+    <section id="view-products" class="view-section active">
+      <div style="margin-bottom: 8px;">
+
+        <!-- Quick Status Filter Pills & View Mode Toggle Bar (Placed at far right) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; margin-bottom: 26px;">
+          <!-- Quick Status Filter Pills -->
+          <div class="quick-filter-pills-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="quick-filter-pill active" id="pill-all" data-status="ALL">
+              <i class="fa-solid fa-boxes-stacked" style="color: var(--711-green);"></i>
+              <span data-i18n="pill_all">ทั้งหมด</span>
+              <span class="quick-count-badge badge-all" id="stat-sku-count">140</span>
+            </button>
+            <button class="quick-filter-pill" id="pill-instock" data-status="IN_STOCK">
+              <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
+              <span data-i18n="pill_instock">สินค้าในสต็อก</span>
+              <span class="quick-count-badge badge-instock" id="stat-instock-count">75</span>
+            </button>
+            <button class="quick-filter-pill" id="pill-outofstock" data-status="OUT_OF_STOCK">
+              <i class="fa-solid fa-ban" style="color: #ef4444;"></i>
+              <span data-i18n="pill_outofstock">สินค้าหมดสต็อก</span>
+              <span class="quick-count-badge badge-outofstock" id="stat-outofstock-count">45</span>
+            </button>
+            <button class="quick-filter-pill" id="pill-promo" data-status="PROMO">
+              <i class="fa-solid fa-fire" style="color: var(--711-orange);"></i>
+              <span data-i18n="pill_promo">มีโปรโมชั่น</span>
+              <span class="quick-count-badge badge-promo" id="stat-promo-count">78</span>
+            </button>
+            <button class="quick-filter-pill" id="pill-regular" data-status="REGULAR">
+              <i class="fa-solid fa-tag" style="color: #64748b;"></i>
+              <span data-i18n="pill_regular">สินค้าราคาปกติ</span>
+              <span class="quick-count-badge badge-regular" id="stat-regular-count">42</span>
+            </button>
+          </div>
+
+          <!-- Display Mode Toggle Buttons (List vs Catalog) - Placed on the Far Right of Quick Filter -->
+          <div class="view-mode-toggle-group">
+            <button class="view-mode-btn active" id="btn-mode-list">
+              <i class="fa-solid fa-list-ul"></i> <span data-i18n="btn_mode_list">มุมมองตาราง</span>
+            </button>
+            <button class="view-mode-btn" id="btn-mode-catalog">
+              <i class="fa-solid fa-border-all"></i> <span data-i18n="btn_mode_catalog">มุมมองแคตตาล็อก</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Unified Search & Filter Toolbar (Search, Category, Promo Category) -->
+        <div class="db-filter-toolbar" style="margin-top: 0; margin-bottom: 8px; background: transparent; border: none; padding: 0;">
+          <div class="filter-input-item" style="flex: 1; min-width: 220px;">
+            <label><i class="fa-solid fa-magnifying-glass"></i> <span data-i18n="label_search">ค้นหาชื่อ/SKU:</span></label>
+            <input type="text" id="db-search-input" class="form-control" placeholder="ค้นหารหัส SKU หรือชื่อสินค้า..." />
+          </div>
+
+          <div class="filter-input-item" style="width: 200px; flex: none;">
+            <label><i class="fa-solid fa-layer-group"></i> <span data-i18n="label_category">หมวดหมู่สินค้า:</span></label>
+            <select id="db-category-filter" class="form-control">
+              <option value="ALL">ทุกหมวดหมู่</option>
+              <option value="Dairy">นม/ผลิตภัณฑ์นม</option>
+              <option value="Bakery">เบเกอรี่/ขนมปัง</option>
+              <option value="Beverage">เครื่องดื่ม</option>
+              <option value="Ready-to-Eat">อาหารพร้อมทาน</option>
+              <option value="Snacks">ขนมขบเคี้ยว</option>
+              <option value="Instant Noodles">บะหมี่สำเร็จรูป</option>
+              <option value="Ice Cream">ไอศกรีม</option>
+              <option value="Frozen Food">อาหารแช่แข็ง</option>
+              <option value="Personal Care">ของใช้ส่วนตัว</option>
+              <option value="Household">ของใช้ในบ้าน</option>
+            </select>
+          </div>
+
+          <div class="filter-input-item" style="width: 220px; flex: none;">
+            <label><i class="fa-solid fa-bullhorn"></i> <span data-i18n="label_promocat">โปรโมชั่น:</span></label>
+            <select id="db-promocat-filter" class="form-control">
+              <option value="ALL">โปรโมชั่นทั้งหมด</option>
+              <option value="Buy 2 Get Discount">ซื้อ 2 ชิ้นราคาพิเศษ</option>
+              <option value="Buy 1 Get 1 Free">ซื้อ 1 แถม 1</option>
+              <option value="Combo Deal">จับคู่สุดคุ้ม</option>
+              <option value="ALL Member Discount">ส่วนลดสมาชิก ALL Member</option>
+              <option value="Stamp Collection">สะสมแสตมป์</option>
+              <option value="Instant Discount">ลดทันที</option>
+              <option value="Regular Price">สินค้าราคาปกติ</option>
+            </select>
+          </div>
+
+          <!-- Reset Filters Icon Button (Matches filter dropdown style) -->
+          <button id="db-reset-filters-btn" class="btn-filter-reset" title="รีเซ็ตตัวกรอง">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+
+        <div style="font-size: 12.5px; color: var(--711-text-muted); margin-top: 6px; margin-bottom: 2px;" id="db-result-count-container">
+          <span>แสดงผล <strong><span id="db-result-count">120</span></strong> รายการ</span>
+        </div>
+      </div>
+
+      <!-- Mode 1: Catalog Grid Container (With Dedicated Catalog Sort Controls) -->
+      <div id="catalog-container" class="display-mode-section">
+        <!-- Dedicated Catalog View Sort Header Bar (Exclusively for Catalog View) -->
+        <div class="catalog-sort-header-bar">
+          <div class="catalog-sort-title">
+            <i class="fa-solid fa-arrow-down-short-wide" style="color: var(--711-orange);"></i>
+            <span data-i18n="catalog_sort_label">เรียงลำดับ:</span>
+          </div>
+
+          <div class="catalog-sort-select-wrap">
+            <select id="catalog-sort-select" class="form-control catalog-sort-select">
+              <option value="sku_asc">รหัสสินค้า</option>
+              <option value="name_asc">ชื่อสินค้า A-Z</option>
+              <option value="price_asc">ราคา: น้อย ➔ มาก</option>
+              <option value="price_desc">ราคา: มาก ➔ น้อย</option>
+              <option value="stock_desc">สต็อก: มาก ➔ น้อย</option>
+              <option value="stock_asc">สต็อก: น้อย ➔ มาก</option>
+              <option value="category_asc">หมวดหมู่สินค้า</option>
+              <option value="promocat_asc">โปรโมชั่น</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="bulletin-grid" class="bulletin-grid-container">
+          <!-- Rendered dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- Mode 2: List Table Container -->
+      <div id="list-container" class="display-mode-section active">
+        <div class="table-card" style="padding: 16px; border-radius: 12px;">
+          <table class="custom-table sortable-table" id="promotions-table">
+            <thead>
+              <tr>
+                <th data-sort="sku" class="sort-header" style="width: 80px;"><span data-i18n="th_sku">SKU Code</span> <span class="sort-icon">↕</span></th>
+                <th data-sort="name" class="sort-header" style="width: 280px;"><span data-i18n="th_name">ชื่อสินค้า</span> <span class="sort-icon">↕</span></th>
+                <th data-sort="category" class="sort-header" style="width: 140px;"><span data-i18n="th_category">หมวดหมู่</span> <span class="sort-icon">↕</span></th>
+                <th data-sort="promocat" class="sort-header" style="width: 140px;"><span data-i18n="th_promocat">โปรโมชั่น</span> <span class="sort-icon">↕</span></th>
+                <th data-sort="promo" class="sort-header" style="width: 140px; white-space: nowrap;"><span data-i18n="th_product_status">สถานะสินค้า</span> <span class="sort-icon">↕</span></th>
+                <th data-sort="price" class="sort-header" style="width: 140px;"><span data-i18n="th_price">ราคา (THB)</span> <span class="sort-icon">↕</span></th>
+                <th style="width: 285px;"><span data-i18n="th_details">รายละเอียดโปรโมชั่น</span></th>
+              </tr>
+            </thead>
+            <tbody id="promotions-tbody">
+              <!-- Table rows rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- New View: Low Stock Reorder Checklist Page -->
+    <section id="view-reorder" class="view-section">
+      <div class="reorder-card">
+
+
+        <div class="reorder-summary-box">
+          <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; width: 235px; flex-shrink: 0;">
+              <input type="checkbox" id="check-lowstock-reorder" style="width: 18px; height: 18px; accent-color: #005D3B; cursor: pointer; flex-shrink: 0;" />
+              <label for="check-lowstock-reorder" style="font-size: 13.5px; font-weight: 800; cursor: pointer; color: var(--711-text-main); white-space: nowrap;" data-i18n="label_select_lowstock">เลือกเฉพาะสินค้าหมด/ใกล้หมด</label>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; width: 140px; flex-shrink: 0;">
+              <input type="checkbox" id="check-all-reorder" style="width: 18px; height: 18px; accent-color: #005D3B; cursor: pointer; flex-shrink: 0;" />
+              <label for="check-all-reorder" style="font-size: 13.5px; font-weight: 800; cursor: pointer; color: #64748b; white-space: nowrap;" data-i18n="label_select_all">เลือกทั้งหมด</label>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 13.5px; font-weight: 700; color: var(--711-text-main);">
+              <span id="reorder-selected-summary">จำนวนรายการที่เลือก: <strong id="reorder-selected-count" style="color: #ef4444;">0</strong> รายการ</span> |
+              <span id="reorder-total-summary">รวมสั่งซื้อทั้งสิ้น: <strong id="reorder-total-qty" style="color: #ef4444;">0</strong> ชิ้น</span>
+            </div>
+            <button id="btn-top-submit-reorder" class="btn-red-submit" disabled style="height: 38px; padding: 0 18px; font-size: 13px; border-radius: 6px; white-space: nowrap; background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; width: 140px; justify-content: center;">
+              <i class="fa-solid fa-cart-shopping"></i> <span data-i18n="btn_submit_order">สั่งซื้อสินค้า</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table class="reorder-checklist-table sortable-table" id="reorder-table" style="width: 100%; min-width: 1080px; table-layout: fixed;">
+            <thead>
+              <tr>
+                <th data-sort="select" class="sort-header" style="width: 75px; text-align: center;" data-i18n="th_select">เลือก <span class="reorder-sort-icon">↕</span></th>
+                <th data-sort="sku" class="sort-header" style="width: 80px;" data-i18n="th_sku">SKU Code <span class="reorder-sort-icon">↕</span></th>
+                <th data-sort="name" class="sort-header" style="width: 280px;" data-i18n="th_name">ชื่อสินค้า <span class="reorder-sort-icon">↕</span></th>
+                <th data-sort="category" class="sort-header" style="width: 140px;" data-i18n="th_category">หมวดหมู่ <span class="reorder-sort-icon">↕</span></th>
+                <th data-sort="promocat" class="sort-header" style="width: 140px;" data-i18n="th_promocat">โปรโมชั่น <span class="reorder-sort-icon">↕</span></th>
+                <th data-sort="stock" class="sort-header" style="width: 140px;" data-i18n="th_product_status">สถานะสินค้า <span class="reorder-sort-icon">↕</span></th>
+                <th data-sort="price" class="sort-header" style="width: 140px;" data-i18n="th_price">ราคา (THB) <span class="reorder-sort-icon">↕</span></th>
+                <th data-sort="qty" class="sort-header" style="width: 130px; text-align: center;" data-i18n="th_order_qty">จำนวนที่สั่งซื้อ <span class="reorder-sort-icon">↕</span></th>
+              </tr>
+            </thead>
+            <tbody id="reorder-tbody">
+              <!-- Rendered dynamically via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- New View: Executive Analytics & Inventory Summary Dashboard -->
+    <section id="view-dashboard" class="view-section">
+      <div class="dashboard-container" style="padding-bottom: 30px;">
+
+
+        <!-- Metric KPI Cards Grid (4 Cards) -->
+        <div class="dashboard-metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 24px;">
+          <!-- KPI 1: Total SKUs -->
+          <div class="kpi-card" style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <span style="font-size: 12px; font-weight: 700; color: var(--711-text-muted); text-transform: uppercase; letter-spacing: 0.5px;" data-i18n="kpi_total_skus">จำนวนสินค้าทั้งหมด</span>
+              <div style="font-size: 28px; font-weight: 900; color: var(--711-text-main); margin-top: 4px;" id="dash-total-skus">140 <span style="font-size: 14px; font-weight: 700; color: #64748b;">SKUs</span></div>
+              <span style="font-size: 11.5px; color: #005D3B; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;" id="dash-total-skus-sub"><i class="fa-solid fa-check-circle"></i> ครอบคลุม 10 หมวดหลัก</span>
+            </div>
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #e6f4ef; display: flex; align-items: center; justify-content: center; color: #005D3B; font-size: 20px;">
+              <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+          </div>
+
+          <!-- KPI 2: Inventory Value -->
+          <div class="kpi-card" style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <span style="font-size: 12px; font-weight: 700; color: var(--711-text-muted); text-transform: uppercase; letter-spacing: 0.5px;" data-i18n="kpi_total_value">มูลค่าสต็อกปัจจุบัน</span>
+              <div style="font-size: 26px; font-weight: 900; color: var(--711-text-main); margin-top: 4px;" id="dash-total-value">฿0</div>
+              <span style="font-size: 11.5px; color: #64748b; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;" id="dash-capacity-pct"><i class="fa-solid fa-chart-simple"></i> คำนวณจากราคาขายปัจจุบัน</span>
+            </div>
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #fef3c7; display: flex; align-items: center; justify-content: center; color: #d97706; font-size: 20px;">
+              <i class="fa-solid fa-coins"></i>
+            </div>
+          </div>
+
+          <!-- KPI 3: Out/Low Stock Count -->
+          <div class="kpi-card" style="background: #fff5f5; padding: 20px; border-radius: 12px; border: 1px solid #fecaca; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <span style="font-size: 12px; font-weight: 700; color: #dc2626; text-transform: uppercase; letter-spacing: 0.5px;" data-i18n="kpi_critical_stock">สินค้าหมด / ใกล้หมด (&lt; 20%)</span>
+              <div style="font-size: 28px; font-weight: 900; color: #dc2626; margin-top: 4px;" id="dash-lowstock-count">0 <span style="font-size: 14px; font-weight: 700;">รายการ</span></div>
+              <span style="font-size: 11.5px; color: #dc2626; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;" id="dash-critical-sub"><i class="fa-solid fa-triangle-exclamation"></i> ต้องการการเติมสต็อกด่วน</span>
+            </div>
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #fee2e2; display: flex; align-items: center; justify-content: center; color: #dc2626; font-size: 20px;">
+              <i class="fa-solid fa-store-slash"></i>
+            </div>
+          </div>
+
+          <!-- KPI 4: Promo SKUs -->
+          <div class="kpi-card" style="background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <span style="font-size: 12px; font-weight: 700; color: var(--711-text-muted); text-transform: uppercase; letter-spacing: 0.5px;" data-i18n="kpi_promo_ratio">สินค้าจัดโปรโมชั่น</span>
+              <div style="font-size: 28px; font-weight: 900; color: var(--711-orange); margin-top: 4px;" id="dash-promo-count">0 <span style="font-size: 14px; font-weight: 700; color: #64748b;">รายการ</span></div>
+              <span style="font-size: 11.5px; color: var(--711-orange); font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px;" id="dash-promo-pct"><i class="fa-solid fa-bullhorn"></i> คิดเป็น % ของสินค้าทั้งหมด</span>
+            </div>
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #fff7ed; display: flex; align-items: center; justify-content: center; color: var(--711-orange); font-size: 20px;">
+              <i class="fa-solid fa-percent"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart Mode Toggle Bar (Clean minimal without frame or title) -->
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+          <div class="dash-toggle-switch" id="dash-chart-mode-toggle">
+            <button type="button" class="dash-chart-btn active" id="btn-chart-bars" data-chart-mode="BARS">
+              <i class="fa-solid fa-chart-column"></i> <span data-i18n="dash_toggle_bars">กราฟแท่ง</span>
+            </button>
+            <button type="button" class="dash-chart-btn" id="btn-chart-pie" data-chart-mode="PIE">
+              <i class="fa-solid fa-chart-pie"></i> <span data-i18n="dash_toggle_pie">กราฟวงกลม</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Charts & Analytics Section (Two Columns) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px; margin-bottom: 24px;">
+          <!-- Left Column: Category Distribution Progress Bars / Pie Chart -->
+          <div style="background: #ffffff; padding: 22px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 15.5px; font-weight: 800; color: var(--711-text-main); margin: 0 0 16px 0; display: flex; align-items: center; justify-content: space-between;">
+              <span data-i18n="dash_cat_breakdown"><i class="fa-solid fa-layer-group" style="color: #005D3B; margin-right: 8px;"></i> สัดส่วนสินค้าตามหมวดหมู่</span>
+              <span style="font-size: 12px; color: #64748b; font-weight: 600;" id="dash-cat-count-badge">10 หมวด</span>
+            </h3>
+            <div id="dash-category-breakdown" style="display: flex; flex-direction: column; gap: 14px;">
+              <!-- Dynamic Content rendered via JS (Progress Bars or Canvas Pie Chart) -->
+            </div>
+          </div>
+
+          <!-- Right Column: Promotion Types Breakdown -->
+          <div style="background: #ffffff; padding: 22px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm);">
+            <h3 style="font-size: 15.5px; font-weight: 800; color: var(--711-text-main); margin: 0 0 16px 0; display: flex; align-items: center; justify-content: space-between;">
+              <span data-i18n="dash_promo_breakdown"><i class="fa-solid fa-tags" style="color: var(--711-orange); margin-right: 8px;"></i> สัดส่วนประเภทโปรโมชั่น</span>
+              <span style="font-size: 12px; color: #64748b; font-weight: 600;">E-Bulletin</span>
+            </h3>
+            <div id="dash-promocat-breakdown" style="display: flex; flex-direction: column; gap: 14px;">
+              <!-- Dynamic Content rendered via JS (Progress Bars or Canvas Pie Chart) -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Section: Critical Stock Alert Table -->
+        <div style="background: #ffffff; padding: 22px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h3 style="font-size: 16px; font-weight: 800; color: #dc2626; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="dash_critical_alert">รายการสินค้าต้องเติมสต็อกเร่งด่วน</span>
+              </h3>
+              <p style="font-size: 12.5px; color: var(--711-text-muted); margin: 2px 0 0 0;" data-i18n="dash_critical_desc">สินค้าที่มีระดับสต็อกต่ำกว่า 20% ของความจุถังคลังสินค้า</p>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="reorder-checklist-table sortable-table" style="width: 100%; min-width: 900px; table-layout: fixed;">
+              <thead>
+                <tr>
+                  <th style="width: 80px;" data-i18n="th_sku">SKU Code</th>
+                  <th style="width: 280px;" data-i18n="th_name">ชื่อสินค้า</th>
+                  <th style="width: 140px;" data-i18n="th_category">หมวดหมู่</th>
+                  <th style="width: 140px;" data-i18n="th_promocat">โปรโมชั่น</th>
+                  <th style="width: 140px;" data-i18n="th_product_status">สถานะสินค้า</th>
+                  <th style="width: 140px;" data-i18n="th_price">ราคา (THB)</th>
+                </tr>
+              </thead>
+              <tbody id="dash-critical-stock-tbody">
+                <!-- Rendered dynamically via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modern Floating Chat Assistant Widget (Bottom Right FAB & Pop-up Drawer Widget) -->
+  <!-- 1. Floating Action Button (FAB) -->
+  <div class="floating-chat-fab" id="floating-chat-trigger" title="คลิกเพื่อเปิดผู้ช่วย ถาม AI / Click to open Ask AI Assistant">
+    <div class="fab-avatar-badge">
+      <i class="fa-solid fa-comments" style="font-size: 16px; color: var(--711-orange);"></i>
+      <span class="fab-unread-dot"></span>
+    </div>
+    <span class="fab-text" data-i18n="fab_chat_ai">ถาม AI</span>
+  </div>
+
+  <!-- 2. Floating Chat Drawer Modal Window -->
+  <div class="floating-chat-drawer" id="floating-chat-drawer">
+    <div class="floating-chat-header">
+      <div class="floating-assistant-info">
+        <div class="assistant-avatar">
+          <i class="fa-solid fa-robot" style="font-size: 17px; color: var(--711-orange);"></i>
+        </div>
+        <div class="assistant-details">
+          <h3 data-i18n="fab_chat_ai">ถาม AI</h3>
+          <div class="status-online"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> AI RAG System • Online</div>
+        </div>
+      </div>
+
+      <div class="floating-header-actions">
+        <button class="icon-btn" id="set-api-key-btn" title="ตั้งค่า Gemini API Key">
+          <i class="fa-solid fa-key"></i>
+        </button>
+        <button class="icon-btn" id="toggle-presets-btn" title="ตัวอย่างคำถาม">
+          <i class="fa-solid fa-lightbulb"></i>
+        </button>
+        <button class="icon-btn" id="clear-chat-btn" title="ล้างประวัติการคุย">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+        <button class="icon-btn close-btn" id="close-floating-chat-btn" title="ปิดหน้าต่าง">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Collapsible Preset Query Chips Bar -->
+    <div class="floating-presets-drawer" id="floating-presets-drawer">
+      <div class="presets-drawer-header">
+        <span data-i18n="preset_queries_header"><i class="fa-solid fa-bolt" style="color: var(--711-orange);"></i> ตัวอย่างคำถามด่วน</span>
+      </div>
+      <div class="preset-list" id="preset-list-container">
+        <!-- Preset Query Chips Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- Live Chat Messages Thread -->
+    <div class="chat-messages" id="chat-messages-container">
+      <!-- Chat Messages rendered dynamically via JS -->
+    </div>
+
+    <!-- Chat Input Area -->
+    <div class="chat-input-bar">
+      <input type="text" id="chat-input" class="chat-input" placeholder="พิมพ์คำถามเกี่ยวกับโปรโมชั่น หรือสินค้า..." />
+      <button id="send-chat-btn" class="send-btn">
+        <i class="fa-solid fa-paper-plane"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Add Product Modal -->
+  <div class="modal-overlay" id="add-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span>เพิ่มสินค้าใหม่เข้าสู่ระบบ (Add Product)</span>
+        <i class="fa-solid fa-xmark" id="close-modal-btn" style="cursor: pointer;"></i>
+      </div>
+      <form id="add-product-form">
+        <div class="form-group">
+          <label>SKU Code (เช่น SKU121)</label>
+          <input type="text" id="add-sku" class="form-control" required placeholder="SKU121" />
+        </div>
+        <div class="form-group">
+          <label>ชื่อสินค้าภาษาไทย (Name TH)</label>
+          <input type="text" id="add-name-th" class="form-control" required placeholder="เป๊ปซี่ ซีโร่ 325มล." />
+        </div>
+        <div class="form-group">
+          <label>ชื่อสินค้าภาษาอังกฤษ (Name EN)</label>
+          <input type="text" id="add-name-en" class="form-control" required placeholder="Pepsi Zero Sugar 325ml" />
+        </div>
+        <div class="form-group">
+          <label>หมวดหมู่สินค้า (Category)</label>
+          <select id="add-category" class="form-control">
+            <option value="Beverage">Beverage</option>
+            <option value="Ready-to-Eat">Ready-to-Eat</option>
+            <option value="Bakery">Bakery</option>
+            <option value="Dairy">Dairy</option>
+            <option value="Snacks">Snacks</option>
+            <option value="Instant Noodles">Instant Noodles</option>
+            <option value="Ice Cream">Ice Cream</option>
+            <option value="Frozen Food">Frozen Food</option>
+            <option value="Personal Care">Personal Care</option>
+            <option value="Household">Household</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>โปรโมชั่น</label>
+          <select id="add-promocat" class="form-control">
+            <option value="Buy 2 Get Discount">Buy 2 Get Discount (ซื้อ 2 ชิ้นราคาพิเศษ)</option>
+            <option value="Buy 1 Get 1 Free">Buy 1 Get 1 Free (ซื้อ 1 แถม 1)</option>
+            <option value="Combo Deal">Combo Deal (จับคู่สุดคุ้ม)</option>
+            <option value="ALL Member Discount">ALL Member Discount (ส่วนลดสมาชิก)</option>
+            <option value="Stamp Collection">Stamp Collection (สะสมแสตมป์)</option>
+            <option value="Instant Discount">Instant Discount (ลดทันที)</option>
+            <option value="Regular Price">Regular Price (สินค้าราคาปกติ)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ราคา (บาท)</label>
+          <input type="number" step="0.25" id="add-price" class="form-control" required placeholder="15.00" />
+        </div>
+        <div class="form-group">
+          <label>จำนวนสต็อกปัจจุบัน / ความจุสูงสุด (ตั้งเป็น 0 หากสินค้าหมด)</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="number" id="add-stock" class="form-control" placeholder="0" required />
+            <input type="number" id="add-capacity" class="form-control" placeholder="100" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>รายละเอียดโปรโมชั่น ภาษาไทย</label>
+          <textarea id="add-desc-th" class="form-control" rows="2" required placeholder="โปร E-Bulletin: ซื้อ 2 กระป๋อง ลด 4 บาท"></textarea>
+        </div>
+        <div class="form-group">
+          <label>รายละเอียดโปรโมชั่น ภาษาอังกฤษ</label>
+          <textarea id="add-desc-en" class="form-control" rows="2" required placeholder="E-Bulletin Promo: Buy 2 save 4 THB"></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">บันทึกรายการสินค้า (Save Product)</button>
+      </form>
+  </div>
+
+  <script src="rag_engine.js?v=20260812_v299"></script>
+  <script src="app.js?v=20260812_v299"></script>
+</body>
+</html>
