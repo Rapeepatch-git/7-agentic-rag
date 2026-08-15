@@ -10,6 +10,107 @@
 document.addEventListener('DOMContentLoaded', () => {
   const GEMINI_DEFAULT_API_KEY = localStorage.getItem('gemini_api_key') || '';
 
+  // Authentication & Login System Elements
+  const loginOverlay = document.getElementById('login-overlay');
+  const loginForm = document.getElementById('login-form');
+  const loginUsernameInput = document.getElementById('login-username');
+  const loginPasswordInput = document.getElementById('login-password');
+  const loginErrorMsg = document.getElementById('login-error-msg');
+  const togglePwdBtn = document.getElementById('toggle-pwd-btn');
+  const pwdEyeIcon = document.getElementById('pwd-eye-icon');
+  const btnLogout = document.getElementById('btn-logout');
+
+  // Toggle Password Visibility
+  togglePwdBtn?.addEventListener('click', () => {
+    if (loginPasswordInput.type === 'password') {
+      loginPasswordInput.type = 'text';
+      pwdEyeIcon.className = 'fa-solid fa-eye-slash';
+    } else {
+      loginPasswordInput.type = 'password';
+      pwdEyeIcon.className = 'fa-solid fa-eye';
+    }
+  });
+
+  // Unconditionally require login on every page load
+  sessionStorage.removeItem('is_711_logged_in');
+
+  function checkLoginState() {
+    const isLoggedIn = sessionStorage.getItem('is_711_logged_in') === 'true';
+    if (isLoggedIn) {
+      if (loginOverlay) {
+        loginOverlay.classList.add('hidden');
+        loginOverlay.style.display = 'none';
+      }
+      if (btnLogout) btnLogout.style.display = 'inline-flex';
+    } else {
+      if (loginOverlay) {
+        loginOverlay.classList.remove('hidden');
+        loginOverlay.style.display = 'flex';
+      }
+      if (btnLogout) btnLogout.style.display = 'none';
+    }
+  }
+
+  loginForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const userVal = loginUsernameInput.value.trim();
+    const pwdVal = loginPasswordInput.value.trim();
+
+    // Target Credentials: Username "7_RAG" & Password "1234"
+    const normalizedUser = userVal.toUpperCase().replace(/\s+/g, '_');
+    if ((normalizedUser === '7_RAG' || userVal.toUpperCase() === '7_RAG' || userVal.toUpperCase() === '7 RAG') && pwdVal === '1234') {
+      sessionStorage.setItem('is_711_logged_in', 'true');
+      loginErrorMsg.style.display = 'none';
+      if (loginOverlay) {
+        loginOverlay.classList.add('hidden');
+        loginOverlay.style.display = 'none';
+      }
+      if (btnLogout) btnLogout.style.display = 'inline-flex';
+    } else {
+      loginErrorMsg.style.display = 'flex';
+      loginPasswordInput.value = '';
+      loginPasswordInput.focus();
+    }
+  });
+
+  // Logout Confirmation Modal Elements & Logic
+  const logoutConfirmModal = document.getElementById('logout-confirm-modal');
+  const btnCancelLogout = document.getElementById('btn-cancel-logout');
+  const btnConfirmLogout = document.getElementById('btn-confirm-logout');
+
+  btnLogout?.addEventListener('click', () => {
+    if (logoutConfirmModal) {
+      logoutConfirmModal.classList.remove('hidden');
+      logoutConfirmModal.style.display = 'flex';
+    }
+  });
+
+  btnCancelLogout?.addEventListener('click', () => {
+    if (logoutConfirmModal) {
+      logoutConfirmModal.classList.add('hidden');
+      logoutConfirmModal.style.display = 'none';
+    }
+  });
+
+  btnConfirmLogout?.addEventListener('click', () => {
+    if (logoutConfirmModal) {
+      logoutConfirmModal.classList.add('hidden');
+      logoutConfirmModal.style.display = 'none';
+    }
+    sessionStorage.removeItem('is_711_logged_in');
+    loginUsernameInput.value = '';
+    loginPasswordInput.value = '';
+    loginErrorMsg.style.display = 'none';
+    if (loginOverlay) {
+      loginOverlay.classList.remove('hidden');
+      loginOverlay.style.display = 'flex';
+    }
+    if (btnLogout) btnLogout.style.display = 'none';
+  });
+
+  // Initial check on load
+  checkLoginState();
+
   // Floating Chat Drawer Elements & Controls
   const floatingChatTrigger = document.getElementById('floating-chat-trigger');
   const floatingChatDrawer = document.getElementById('floating-chat-drawer');
@@ -218,6 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
       stat_latency: "ความเร็ว Agent",
       btn_dashboard: "แดชบอร์ด",
       btn_reorder_sheet: "ใบสั่งซื้อสินค้า",
+      btn_logout: "ออกจากระบบ",
       reorder_title: "ใบสั่งซื้อสินค้า",
       reorder_desc: "รายการสินค้าทั้งหมด สามารถเลือกและระบุจำนวนสั่งซื้อได้ (คำนวณจำนวนสั่งซื้อเริ่มต้นจาก Capacity - สต็อกปัจจุบัน)",
       label_select_lowstock: "เลือกเฉพาะสินค้าหมด/ใกล้หมด",
@@ -254,7 +356,18 @@ document.addEventListener('DOMContentLoaded', () => {
       btn_send: "ส่งคำถาม",
       btn_clear_chat: "ล้างแชท",
       btn_back: "ย้อนกลับไปหน้าหลัก",
-      welcome_msg: `สวัสดีค่ะ! ยินดีต้อนรับสู่ **7-Eleven Smart Retail Agentic RAG** ระบบจัดการโบร์ชัวร์โปรโมชั่นและสินค้าคงคลัง 🏪✨\n\nคุณสามารถเลือกระหว่าง **"มุมมองแคตตาล็อก"** กับ **"มุมมองตาราง"** หรือเลือกปุ่มตัวกรองด่วน (Quick Status Filter) ได้ทันทีค่ะ!`
+      welcome_msg: `สวัสดีค่ะ! ยินดีต้อนรับสู่ **7-Eleven Smart Retail Agentic RAG** ระบบจัดการโบร์ชัวร์โปรโมชั่นและสินค้าคงคลัง 🏪✨\n\nคุณสามารถเลือกระหว่าง **"มุมมองแคตตาล็อก"** กับ **"มุมมองตาราง"** หรือเลือกปุ่มตัวกรองด่วน (Quick Status Filter) ได้ทันทีค่ะ!`,
+      login_sub_text: "เข้าสู่ระบบการจัดการสต็อกและโปรโมชั่น",
+      login_username_label: "ชื่อผู้ใช้งาน (Username)",
+      login_password_label: "รหัสผ่าน (Password)",
+      login_user_placeholder: "กรอก Username...",
+      login_pwd_placeholder: "กรอก Password...",
+      login_error_msg: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!",
+      login_btn_signin: "เข้าสู่ระบบ (Sign In)",
+      logout_title: "ยืนยันการออกจากระบบ",
+      logout_desc: "คุณต้องการออกจากระบบ 7-Eleven Smart Retail ใช่หรือไม่?",
+      logout_btn_cancel: "ยกเลิก",
+      logout_btn_confirm: "ออกจากระบบ"
     },
     EN: {
       bulletin_title: "7-Eleven Products & Promotions Bulletin",
@@ -281,6 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
       stat_latency: "Agent Latency",
       btn_dashboard: "Dashboard",
       btn_reorder_sheet: "Stock Reorder",
+      btn_logout: "Sign Out",
       reorder_title: "Stock Reorder Sheet",
       reorder_desc: "Items list with stock & order quantities (Calculated default: Capacity - Current Stock)",
       label_select_lowstock: "Select Low Stock Only (<20%)",
@@ -317,7 +431,18 @@ document.addEventListener('DOMContentLoaded', () => {
       btn_send: "Send Query",
       btn_clear_chat: "Clear Chat",
       btn_back: "Back to Main View",
-      welcome_msg: `Welcome to **7-Eleven Smart Retail Agentic RAG** E-Bulletin & Inventory System 🏪✨\n\nToggle display mode between **Catalog View** and **List Table View** or use Quick Status Filter pills above!`
+      welcome_msg: `Welcome to **7-Eleven Smart Retail Agentic RAG** E-Bulletin & Inventory System 🏪✨\n\nToggle display mode between **Catalog View** and **List Table View** or use Quick Status Filter pills above!`,
+      login_sub_text: "Sign in to Inventory & Promotions Management",
+      login_username_label: "Username",
+      login_password_label: "Password",
+      login_user_placeholder: "Enter Username...",
+      login_pwd_placeholder: "Enter Password...",
+      login_error_msg: "Invalid username or password!",
+      login_btn_signin: "Sign In",
+      logout_title: "Confirm Sign Out",
+      logout_desc: "Are you sure you want to sign out of 7-Eleven Smart Retail?",
+      logout_btn_cancel: "Cancel",
+      logout_btn_confirm: "Sign Out"
     }
   };
 
@@ -449,6 +574,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (chatInput) chatInput.placeholder = i18n[lang].chat_placeholder;
     if (dbSearchInput) dbSearchInput.placeholder = i18n[lang].search_placeholder;
+    if (loginUsernameInput) loginUsernameInput.placeholder = i18n[lang].login_user_placeholder;
+    if (loginPasswordInput) loginPasswordInput.placeholder = i18n[lang].login_pwd_placeholder;
 
     // Update Deep Link Box labels across chat history
     document.querySelectorAll('.ai-reorder-deeplink-box').forEach(box => {

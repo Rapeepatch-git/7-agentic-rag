@@ -4,10 +4,102 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>7-Eleven Smart Retail E-Bulletin Agentic RAG (140 SKUs) | Antigravity</title>
-  <link rel="stylesheet" href="styles.css?v=20260812_v299">
+  <link rel="stylesheet" href="styles.css?v=20260815_v99999">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
+  <style>
+    .login-overlay {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 9999999 !important;
+      background: rgba(15, 23, 42, 0.88) !important;
+      backdrop-filter: blur(12px) !important;
+      -webkit-backdrop-filter: blur(12px) !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 20px !important;
+    }
+    .login-overlay.hidden {
+      display: none !important;
+    }
+  </style>
 <body>
+
+  <!-- Login Screen Overlay -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card-container">
+      <div class="brand-stripes-top">
+        <div class="stripe-red"></div>
+        <div class="stripe-green"></div>
+        <div class="stripe-orange"></div>
+      </div>
+      
+      <div class="login-card-body">
+        <div class="login-logo-area">
+          <div class="logo-badge-lg">
+            <div class="logo-inner-lg">
+              <span class="logo-7-lg">7</span>
+              <span class="logo-eleven-lg">ELEVEN</span>
+            </div>
+          </div>
+          <h2 class="login-title">Smart Retail RAG</h2>
+          <p class="login-subtitle" id="login-sub-text" data-i18n="login_sub_text">เข้าสู่ระบบการจัดการสต็อกและโปรโมชั่น</p>
+        </div>
+
+        <form id="login-form" class="login-form">
+          <div class="login-form-group">
+            <label for="login-username"><i class="fa-solid fa-user" style="color: var(--711-green);"></i> <span data-i18n="login_username_label">ชื่อผู้ใช้งาน (Username)</span></label>
+            <input type="text" id="login-username" class="login-input" placeholder="กรอก Username..." required autocomplete="off">
+          </div>
+
+          <div class="login-form-group">
+            <label for="login-password"><i class="fa-solid fa-lock" style="color: var(--711-green);"></i> <span data-i18n="login_password_label">รหัสผ่าน (Password)</span></label>
+            <div class="password-input-wrapper">
+              <input type="password" id="login-password" class="login-input" placeholder="กรอก Password..." required>
+              <button type="button" id="toggle-pwd-btn" class="toggle-pwd-btn" title="แสดง/ซ่อนรหัสผ่าน">
+                <i class="fa-solid fa-eye" id="pwd-eye-icon"></i>
+              </button>
+            </div>
+          </div>
+
+          <div id="login-error-msg" class="login-error-msg" style="display: none;">
+            <i class="fa-solid fa-circle-exclamation"></i> <span data-i18n="login_error_msg">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง!</span>
+          </div>
+
+          <button type="submit" class="login-submit-btn">
+            <i class="fa-solid fa-right-to-bracket"></i> <span data-i18n="login_btn_signin">เข้าสู่ระบบ (Sign In)</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div id="logout-confirm-modal" class="login-overlay hidden" style="display: none;">
+    <div class="login-card-container" style="max-width: 380px;">
+      <div class="brand-stripes-top">
+        <div class="stripe-red"></div>
+        <div class="stripe-green"></div>
+        <div class="stripe-orange"></div>
+      </div>
+      <div class="login-card-body" style="text-align: center; padding: 28px 24px 24px;">
+        <div style="width: 60px; height: 60px; background: var(--711-red-light); color: var(--711-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 16px; border: 2px solid rgba(238, 49, 36, 0.2);">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </div>
+        <h3 style="font-size: 20px; font-weight: 800; color: var(--711-text-main); margin-bottom: 8px;" data-i18n="logout_title">ยืนยันการออกจากระบบ</h3>
+        <p style="font-size: 14px; color: var(--711-text-muted); margin-bottom: 24px; line-height: 1.5;" data-i18n="logout_desc">คุณต้องการออกจากระบบ 7-Eleven Smart Retail ใช่หรือไม่?</p>
+        
+        <div style="display: flex; gap: 12px; width: 100%;">
+          <button type="button" id="btn-cancel-logout" style="flex: 1; height: 46px; border: 1.5px solid var(--711-border); background: var(--711-gray-bg); color: var(--711-text-main); font-size: 14px; font-weight: 700; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;">
+            <span data-i18n="logout_btn_cancel">ยกเลิก</span>
+          </button>
+          <button type="button" id="btn-confirm-logout" style="flex: 1; height: 46px; background: var(--711-red); color: #ffffff; border: none; font-size: 14px; font-weight: 700; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 12px rgba(238, 49, 36, 0.3); transition: all 0.2s ease;">
+            <i class="fa-solid fa-check"></i> <span data-i18n="logout_btn_confirm">ออกจากระบบ</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Top Tricolor Stripes Bar -->
   <div class="brand-stripes-top">
@@ -79,6 +171,11 @@
         <button type="button" class="nav-reorder-btn" id="btn-open-reorder" title="เปิดหน้าใบสั่งซื้อสินค้า">
           <i class="fa-solid fa-cart-shopping"></i>
           <span data-i18n="btn_reorder_sheet">ใบสั่งซื้อสินค้า</span>
+        </button>
+
+        <!-- Logout Icon Button -->
+        <button type="button" class="btn-logout-icon" id="btn-logout" title="ออกจากระบบ (Sign Out)" style="display: none;">
+          <i class="fa-solid fa-right-from-bracket"></i>
         </button>
       </div>
     </div>
@@ -544,7 +641,7 @@
       </form>
   </div>
 
-  <script src="rag_engine.js?v=20260812_v299"></script>
-  <script src="app.js?v=20260812_v299"></script>
+  <script src="rag_engine.js?v=20260815_v99999"></script>
+  <script src="app.js?v=20260815_v99999"></script>
 </body>
 </html>
